@@ -1,0 +1,42 @@
+name: Test_course_exam
+
+on:
+  push:
+    branches: [ "main", "ci-pipeline" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      RAPIDAPI_KEY: ${{ secrets.RAPIDAPI_KEY }}
+      PORT: ${{ secrets.PORT }}
+      MONGO_DB_NAME: ${{ secrets.MONGO_DB_NAME }}
+      MONGO_DB_HOST: ${{ secrets.MONGO_DB_HOST }}
+
+    strategy:
+      matrix:
+        node-version: [18.x]
+        # Vi kan tilføje ekstra versions hvis vi føler for det
+    
+    services:
+      mongodb:
+        image: mongo
+        ports:
+          - 27018:27017
+        options: --name mongodb
+        
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v3
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        
+    - name: Installerer dependencies fra package
+      run: npm ci
+      
+    - run: npm run build --if-present
+    
+    - name: Runs the test script in package
+      run: npm test

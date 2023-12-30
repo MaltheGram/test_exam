@@ -1,0 +1,10 @@
+sonar.projectKey=Testing_exam
+sonar.projectName=Testing_exam
+sonar.projectVersion=1.0
+sonar.sources=.
+sonar.language=js
+sonar.tests=src/tests
+sonar.exclusions=**/tests/**, cypress/**
+sonar.host.url=http://localhost:9000
+sonar.javascript.lcov.reportPaths=coverage/lcov.info
+sonar.token=YOUR_TOKEN

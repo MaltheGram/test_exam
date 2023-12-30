@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation App</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+</head>
+<body>
+    <h3>Translate</h3>
+    <label for="textToTranslate">Text to Translate:</label>
+    <textarea rows="10" id="textToTranslate" placeholder="Enter text"></textarea>
+    <label for="sourceLanguage">Source language:</label>
+    <select id="sourceLanguage"></select>
+    <label for="targetLanguage">Target language:</label>
+    <select id="targetLanguage"></select>
+
+    
+    <button id="translateBtn" onclick="userInputValidationForTranslation(); translateAPI()">Translate</button><br><br>
+    <div id="translationResult"></div>
+
+    <hr>
+
+    <h3>Detect language</h3>
+    <label for="textToDetect">Text to Detect Language:</label>
+    <textarea id="textToDetect" placeholder="Enter text"></textarea>
+
+    <button id="detectBtn" onclick="userInputValidationForDetection(); detectLanguageAPI()">Detect Language</button>
+    <div id="detectionResult"></div>
+
+    <hr>
+
+    <h3>Languages</h3>
+    <label for="allLanguagesPossible">All available languages</label>
+    <button id="langsBtn" onclick="getLanguagesAPI()">Get Languages</button><br><br>
+    <div id="allLanguagesPossible"></div>
+    
+    <script>
+       
+        const languages = [
+            {"value": "af", "text": "Afrikaans"},
+            {"value": "ak", "text": "Akan"},
+            {"value": "am", "text": "Amharic"},
+            {"value": "ar", "text": "Arabic"},
+            {"value": "as", "text": "Assamese"},
+            {"value": "ay", "text": "Aymara"},
+            {"value": "az", "text": "Azerbaijani"},
+            {"value": "be", "text": "Belarusian"},
+            {"value": "bg", "text": "Bulgarian"},
+            {"value": "bho", "text": "Bhojpuri"},
+            {"value": "bm", "text": "Bambara"},
+            {"value": "bn", "text": "Bengali"},
+            {"value": "bs", "text": "Bosnian"},
+            {"value": "ca", "text": "Catalan"},
+            {"value": "ceb", "text": "Cebuano"},
+            {"value": "ckb", "text": "Central Kurdish"},
+            {"value": "co", "text": "Corsican"},
+            {"value": "cs", "text": "Czech"},
+            {"value": "cy", "text": "Welsh"},
+            {"value": "da", "text": "Danish"},
+            {"value": "de", "text": "German"},
+            {"value": "doi", "text": "Dogri"},
+            {"value": "dv", "text": "Dhivehi"},
+            {"value": "ee", "text": "Ewe"},
+            {"value": "el", "text": "Greek"},
+            {"value": "en", "text": "English"},
+            {"value": "eo", "text": "Esperanto"},
+            {"value": "es", "text": "Spanish"},
+            {"value": "et", "text": "Estonian"},
+            {"value": "eu", "text": "Basque"},
+            {"value": "fa", "text": "Persian"},
+            {"value": "fi", "text": "Finnish"},
+            {"value": "fr", "text": "French"},
+            {"value": "fy", "text": "Western Frisian"},
+            {"value": "ga", "text": "Irish"},
+            {"value": "gd", "text": "Scottish Gaelic"},
+            {"value": "gl", "text": "Galician"},
+            {"value": "gn", "text": "Guarani"},
+            {"value": "gom", "text": "Goan Konkani"},
+            {"value": "gu", "text": "Gujarati"},
+            {"value": "ha", "text": "Hausa"},
+            {"value": "haw", "text": "Hawaiian"},
+            {"value": "he", "text": "Hebrew"},
+            {"value": "hi", "text": "Hindi"},
+            {"value": "hmn", "text": "Hmong"},
+            {"value": "hr", "text": "Croatian"},
+            {"value": "ht", "text": "Haitian Creole"},
+            {"value": "hu", "text": "Hungarian"},
+            {"value": "hy", "text": "Armenian"},
+            {"value": "id", "text": "Indonesian"},
+            {"value": "ig", "text": "Igbo"},
+            {"value": "ilo", "text": "Iloko"},
+            {"value": "is", "text": "Icelandic"},
+            {"value": "it", "text": "Italian"},
+            {"value": "iw", "text": "Hebrew"},
+            {"value": "ja", "text": "Japanese"},
+            {"value": "jv", "text": "Javanese"},
+            {"value": "jw", "text": "Javanese"},
+            {"value": "ka", "text": "Georgian"},
+            {"value": "kk", "text": "Kazakh"},
+            {"value": "km", "text": "Khmer"},
+            {"value": "kn", "text": "Kannada"},
+            {"value": "ko", "text": "Korean"},
+            {"value": "kri", "text": "Krio"},
+            {"value": "ku", "text": "Kurdish"},
+            {"value": "ky", "text": "Kyrgyz"},
+            {"value": "la", "text": "Latin"},
+            {"value": "lb", "text": "Luxembourgish"},
+            {"value": "lg", "text": "Ganda"},
+            {"value": "ln", "text": "Lingala"},
+            {"value": "lo", "text": "Lao"},
+            {"value": "lt", "text": "Lithuanian"},
+            {"value": "lus", "text": "Mizo"},
+            {"value": "lv", "text": "Latvian"},
+            {"value": "mai", "text": "Maithili"},
+            {"value": "mg", "text": "Malagasy"},
+            {"value": "mi", "text": "Maori"},
+            {"value": "mk", "text": "Macedonian"},
+            {"value": "ml", "text": "Malayalam"},
+            {"value": "mn", "text": "Mongolian"},
+            {"value": "mni-Mtei", "text": "Manipuri"},
+            {"value": "mr", "text": "Marathi"},
+            {"value": "ms", "text": "Malay"},
+            {"value": "mt", "text": "Maltese"},
+            {"value": "my", "text": "Burmese"},
+            {"value": "ne", "text": "Nepali"},
+            {"value": "nl", "text": "Dutch"},
+            {"value": "no", "text": "Norwegian"},
+            {"value": "nso", "text": "Northern Sotho"},
+            {"value": "ny", "text": "Nyanja"},
+            {"value": "om", "text": "Oromo"},
+            {"value": "or", "text": "Odia"},
+            {"value": "pa", "text": "Punjabi"},
+            {"value": "pl", "text": "Polish"},
+            {"value": "ps", "text": "Pashto"},
+            {"value": "pt", "text": "Portuguese"},
+            {"value": "qu", "text": "Quechua"},
+            {"value": "ro", "text": "Romanian"},
+            {"value": "ru", "text": "Russian"},
+            {"value": "rw", "text": "Kinyarwanda"},
+            {"value": "sa", "text": "Sanskrit"},
+            {"value": "sd", "text": "Sindhi"},
+            {"value": "si", "text": "Sinhala"},
+            {"value": "sk", "text": "Slovak"},
+            {"value": "sl", "text": "Slovenian"},
+            {"value": "sm", "text": "Samoan"},
+            {"value": "sn", "text": "Shona"},
+            {"value": "so", "text": "Somali"},
+            {"value": "sq", "text": "Albanian"},
+            {"value": "sr", "text": "Serbian"},
+            {"value": "st", "text": "Southern Sotho"},
+            {"value": "su", "text": "Sundanese"},
+            {"value": "sv", "text": "Swedish"},
+            {"value": "sw", "text": "Swahili"},
+            {"value": "ta", "text": "Tamil"},
+            {"value": "te", "text": "Telugu"},
+            {"value": "tg", "text": "Tajik"},
+            {"value": "th", "text": "Thai"},
+            {"value": "ti", "text": "Tigrinya"},
+            {"value": "tk", "text": "Turkmen"},
+            {"value": "tl", "text": "Tagalog"},
+            {"value": "tr", "text": "Turkish"},
+            {"value": "ts", "text": "Tsonga"},
+            {"value": "tt", "text": "Tatar"},
+            {"value": "ug", "text": "Uyghur"},
+            {"value": "uk", "text": "Ukrainian"},
+            {"value": "ur", "text": "Urdu"},
+            {"value": "uz", "text": "Uzbek"},
+            {"value": "vi", "text": "Vietnamese"},
+            {"value": "xh", "text": "Xhosa"},
+            {"value": "yi", "text": "Yiddish"},
+            {"value": "yo", "text": "Yoruba"},
+            {"value": "zh", "text": "Chinese"},
+            {"value": "zh-CN", "text": "Chinese (Simplified)"},
+            {"value": "zh-TW", "text": "Chinese (Traditional)"},
+            {"value": "zu", "text": "Zulu"}
+            ]
+
+
+        const sourceLanguageDropdown = document.getElementById("sourceLanguage");
+        const targetLanguageDropdown = document.getElementById("targetLanguage");
+        const translationResultDiv = document.getElementById("translationResult");
+        const detectionResultDiv = document.getElementById("detectionResult");
+        const allLanguages = document.getElementById("allLanguagesPossible");
+        console.log("language" , languages)
+        languages.forEach(lang => {
+            const optionSource = document.createElement("option");
+            optionSource.value = lang.value;
+            optionSource.text = lang.text;
+            sourceLanguageDropdown.add(optionSource);
+
+            const optionTarget = document.createElement("option");
+            optionTarget.value = lang.value;
+            optionTarget.text = lang.text;
+            targetLanguageDropdown.add(optionTarget);
+        });
+        
+
+
+        async function translateAPI() {
+            const textToTranslate = document.getElementById("textToTranslate").value;
+            const sourceLanguage = sourceLanguageDropdown.value;
+            const targetLanguage = targetLanguageDropdown.value;
+
+            try {
+                const response = await axios.post('/translate', { text: textToTranslate, source: sourceLanguage, target: targetLanguage });
+                console.log("Response: ", response)
+                translationResultDiv.innerHTML = "<strong>Translated text: </strong>" + textToTranslate + " <strong>to</strong> " + response.data.data.translations[0].translatedText;
+                console.log("Translation result: ", response.data.data.translations[0].translatedText);
+            } catch (error) {
+                console.error("Error in translate: ", error);
+            }
+        }
+
+        async function detectLanguageAPI() {
+            const textToDetect = document.getElementById("textToDetect").value;
+
+            try {
+                const response = await axios.post('/detect', { text: textToDetect });
+                detectionResultDiv.innerHTML = "<strong>Detected language: </strong>" + response.data.data.detections[0][0].language;
+                console.log(response.data.data.detections[0][0].language);
+            } catch (error) {
+                console.error("Error in detect: ", error);
+            }
+        }
+        async function getLanguagesAPI() {
+            try {
+                const response = await axios.get('/langs');
+                const nestedLanguages = response.data.data.languages;
+                const languages = nestedLanguages.flat();
+                const languageInfo = languages.map(languageObject => languageObject.language);
+                allLanguages.innerHTML = "<strong>All available languages:</strong> <br>" + languageInfo.join(', ');   
+                console.log(response.data.data.languages);
+            } catch (error) {
+                console.error("Error in get languages: ", error);
+            }
+        }
+
+        async function userInputValidationForDetection() {
+            try{
+
+                const textToDetect = document.getElementById("textToDetect").value;
+                const number = /^[0-9]+$/;
+                const specialChars = /^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
+        
+                if(textToDetect === ""){
+                    detectionResultDiv.innerHTML = "<strong>Please enter text to detect</strong>";
+                }else if(textToDetect === number || textToDetect === specialChars){
+                    detectionResultDiv.innerHTML = "<strong>Please enter only text. </strong>";
+                }
+
+            }catch(error){
+                console.error("Error en user validation in detection: ");
+            }
+        
+        }
+
+    async function userInputValidationForTranslation() {
+        try{
+            const textToTranslate = document.getElementById("textToTranslate").value;
+            const sourceLanguage = sourceLanguageDropdown.value;
+            const targetLanguage = targetLanguageDropdown.value;
+            const number = /^[0-9]+$/;
+            const specialChars = /^[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]*$/;
+        
+            if(textToTranslate === ""){
+                translationResultDiv.innerHTML = "<strong>Please enter text to translate</strong>";
+            }else if(textToTranslate === number || textToTranslate === specialChars){
+                translationResultDiv.innerHTML = "<strong>Please enter only text. </strong>";
+            }else if(sourceLanguage === targetLanguage){
+                translationResultDiv.innerHTML = "<strong>Please select different source and target languages</strong>";
+            } 
+        }catch(error){
+            console.error("Error in test user input: ");
+        }
+    }
+    </script>
+</body>
+</html>
+<style>
+    body {
+        font-family: 'Arial', sans-serif;
+        background-color: #f3f3f3;
+        margin: 0;
+        padding: 20px;
+    }
+
+    h1 {
+        color: #333;
+        text-align: center;
+    }
+
+    label {
+        display: block;
+        margin-top: 20px;
+        color: #555;
+        font-size: 14px;
+    }
+
+    textarea, input{
+        width: 100%;
+        padding: 12px 20px;
+        margin: 8px 0;
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    select {
+        width: 49%;
+        padding: 12px 20px;
+        margin: 8px 1%;
+        display: inline-block;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    button {
+        width: 100%;
+        background-color: #4CAF50;
+        color: white;
+        padding: 14px 20px;
+        margin: 8px 0;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+    }
+
+    button:hover {
+        background-color: #45a049;
+    }
+
+    div {
+        margin-top: 20px;
+    }
+
+    hr {
+        margin-top: 40px;
+    }
+
+    #translationResult, #detectionResult, #allLanguagesPossible {
+        background-color: #e7e7e7;
+        padding: 10px;
+        border-radius: 4px;
+    }
+</style>
