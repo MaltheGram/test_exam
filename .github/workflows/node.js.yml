@@ -1,6 +1,7 @@
 name: Test_course_exam
 
 on:
+  workflow_dispatch:
   push:
     branches: [ "main", "ci-pipeline" ]
 
